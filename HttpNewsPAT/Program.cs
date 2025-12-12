@@ -10,6 +10,7 @@ namespace HttpNewsPAT
     {
         static void Main(string[] args)
         {
+
         }
     }
 }
