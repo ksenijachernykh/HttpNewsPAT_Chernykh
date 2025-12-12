@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,7 +14,8 @@ namespace HttpNewsPAT
     {
         static void Main(string[] args)
         {
-            SingIn("user", "user");
+            Cookie token = SingIn("user", "user");
+            GetContent(token);
             /*WebRequest request = WebRequest.Create("http://10.111.20.114/main.php");
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
             Console.WriteLine(response.StatusDescription);
@@ -27,11 +29,12 @@ namespace HttpNewsPAT
             Console.Read();
         }
 
-        public static void SingIn(string Login, string Password)
+        public static Cookie SingIn(string Login, string Password)
         {
-            string url = "http://10.111.20.114/ajax/login.php";
-            Debug.WriteLine($"Выполняем запрос: {url}");
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            Cookie token = null;
+            string Url = "http://10.111.20.114/ajax/login.php";
+            Debug.WriteLine($"Выполняем запрос: {Url}");
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(Url);
             request.Method = "POST";
             request.ContentType = "application/x-www-form-urlencoded";
             request.CookieContainer = new CookieContainer();
@@ -42,10 +45,25 @@ namespace HttpNewsPAT
             {
                 stream.Write(Data, 0, Data.Length);
             }
+            HttpWebResponse Response = (HttpWebResponse)request.GetResponse();
+            Debug.WriteLine($"Статус выполнения: {Response.StatusCode}");
+            string responseFromServer = new StreamReader(Response.GetResponseStream()).ReadToEnd();
+            token= Response.Cookies["token"];
+            return token;
+        }
+
+        public static string GetContent(Cookie Token)
+        {
+            string Content = null;
+            string uri = "http://10.111.20.114/main.php";
+            Debug.WriteLine($"Выполняем запрос: {uri}");
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
+            request.CookieContainer = new CookieContainer();
+            request.CookieContainer.Add(Token);
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            Debug.WriteLine($"Статус выполнения: {response.StatusCode}");
-            string responseFromServer = new StreamReader(response.GetResponseStream()).ReadToEnd();
-            Console.WriteLine(responseFromServer);
+            Debug.WriteLine($"Статус выполения: {response.StatusCode}");
+            Content = new StreamReader(response.GetResponseStream()).ReadToEnd();
+            return Content;
         }
 
     }
