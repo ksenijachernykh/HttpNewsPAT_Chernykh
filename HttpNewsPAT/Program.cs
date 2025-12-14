@@ -1,14 +1,13 @@
-﻿using System;
+﻿using HtmlAgilityPack;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
-using HtmlAgilityPack;
 
 namespace HttpNewsPAT
 {
@@ -35,7 +34,7 @@ namespace HttpNewsPAT
         public static Cookie SingIn(string Login, string Password)
         {
             Cookie token = null;
-            string Url = "http://10.111.20.114/ajax/login.php";
+            string Url = "http://news-site/ajax/login.php";                       /*"http://10.111.20.114/ajax/login.php";*/
             Debug.WriteLine($"Выполняем запрос: {Url}");
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(Url);
             request.Method = "POST";
@@ -58,7 +57,7 @@ namespace HttpNewsPAT
         public static string GetContent(Cookie Token)
         {
             string Content = null;
-            string uri = "http://10.111.20.114/main.php";
+            string uri = "http://news-site/main";               /*"http://10.111.20.114/main.php";*/
             Debug.WriteLine($"Выполняем запрос: {uri}");
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
             request.CookieContainer = new CookieContainer();
@@ -71,14 +70,17 @@ namespace HttpNewsPAT
         public static void ParsingHtml(string htmlCode)
         {
             var html = new HtmlDocument();
+
             html.LoadHtml(htmlCode);
+
             var Document = html.DocumentNode;
             IEnumerable DivsNews = Document.Descendants(0).Where(n => n.HasClass("news"));
-            foreach (HtmlNode DivNews in DivsNews){
+            foreach (HtmlNode DivNews in DivsNews)
+            {
                 var src = DivNews.ChildNodes[1].GetAttributeValue("src", "none");
                 var name = DivNews.ChildNodes[3].InnerText;
                 var description = DivNews.ChildNodes[5].InnerText;
-                Console.WriteLine(name + "\n" + "Изображение: " + src + "\n" + "Описание: " + description + "\n");
+                Console.WriteLine(name + "\n" + "Изображение" + src + "\n" + "Описание:" + description + "\n");
             }
         }
     }
